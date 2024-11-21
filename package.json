@@ -1,26 +1,23 @@
 {
-  "name": "stackblitz-starters-qq8rke",
+  "name": "flex-sdk",
   "version": "0.0.0",
-  "private": true,
-  "dependencies": {
-    "@commercetools/platform-sdk": "^4.9.0",
-    "@commercetools/sdk-client-v2": "^2.2.0",
-    "@types/react": "18.2.7",
-    "@types/react-dom": "18.2.4",
-    "encoding": "^0.1.0",
-    "node-fetch": "2.6.7",
-    "react": "18.2.0",
-    "react-collapsible": "^2.10.0",
-    "react-dom": "18.2.0",
-    "react-hot-toast": "^2.4.1"
-  },
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "ISC",
+  "description": "",
   "devDependencies": {
-    "react-scripts": "latest"
+    "@types/node": "^22.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.33.0",
+    "@okxweb3/coin-aptos": "^1.0.11",
+    "@okxweb3/coin-base": "^1.0.11",
+    "@okxweb3/crypto-lib": "^1.0.6",
+    "dotenv": "^16.4.5"
   }
 }
