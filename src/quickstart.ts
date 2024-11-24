@@ -16,10 +16,9 @@ const sdk = new FlexSDK({
     indexer: TESTNET_INDEXER,
 }, privateKey);
 console.log(`use this address: ${sdk.senderAddress}`);
-
-// sdk.client.getLedgerInfo().then(console.log);
-// sdk.getAccountCoins().then(console.log);
 sdk.getAccountCoinAmount(address, '0x1::aptos_coin::AptosCoin').then(console.log);
+
+
 // const transaction = await sdk.transaction.build.simple({
 //     sender: sdk.Account.account.accountAddress,
 //     data: {
