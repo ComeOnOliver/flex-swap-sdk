@@ -1,48 +1,49 @@
 import { AccountModule } from "./modules/accountModule";
 import { PoolModule } from "./modules/poolModule";
-import { RpcModule } from "./modules/rpcModule";
-import { AptosSettings } from "@aptos-labs/ts-sdk";
-
+// import { RpcModule } from "./modules/rpcModule";
+import { AptosConfig, Aptos, AptosSettings, Network, MoveStructId } from "@aptos-labs/ts-sdk";
+import { PACKAGE_ID } from "./config";
+import { TESTNET_FULLNODE, TESTNET_INDEXER } from "./config";
 
 export class FlexSDK {
 
-    protected _rpcModule: RpcModule
     protected _accountModule: AccountModule
-    protected _poolModule: PoolModule
+    public Pool: PoolModule
     protected _senderAddress = ''
-
-    constructor(options: AptosSettings, privateKey?: string) {
-        this._rpcModule = new RpcModule(options);
+    public client: Aptos;
+    constructor(options: AptosSettings = { network: Network.CUSTOM, fullnode: TESTNET_FULLNODE, indexer: TESTNET_INDEXER }, privateKey?: string) {
         this._accountModule = new AccountModule(privateKey);
-        this._poolModule = new PoolModule();
+        this._senderAddress = this._accountModule.address;
+
+        const config = new AptosConfig({
+            network: options.network,
+            fullnode: options.fullnode,
+            indexer: options.indexer,
+        });
+        this.client = new Aptos(config);
+        this.Pool = new PoolModule(this.client, this._senderAddress);
     }
 
     get senderAddress(): String {
         return this._senderAddress
     }
 
-    set senderAddress(value: string) {
+    set addSender(value: string) {
         this._senderAddress = value
     }
+
+    async getAccountCoins(address: string = this._senderAddress) {
+        return await this.client.getAccountCoinsData({ accountAddress: address });
+    }
+    async getAccountCoinAmount(address: string = this._senderAddress, coinType?: MoveStructId) {
+        return await this.client.getAccountCoinAmount({ accountAddress: address, coinType: coinType });
+    }
+
     get Account(): AccountModule {
         return this._accountModule
     }
 
-    get getConfig() {
-        return { packageId: '11' };
+    get packageId() {
+        return PACKAGE_ID;
     }
 }
-
-const privateKey = process.env.PRIVATE_KEY || '';
-const TESTNET_FULLNODE = process.env.TESTNET_FULLNODE || '';
-const address = process.env.TEST_ADDRESS || '';
-const sdk = new FlexSDK({
-    fullnode: TESTNET_FULLNODE,
-});
-
-console.log(sdk.Account.privateKey);
-console.log(sdk.Account.getAddress());
-// const accountnew = sdk.Account.generateAccount;
-
-// console.log(`publicKey: ${accountnew.publicKey.toString()}`);
-// console.log(`privateKey: ${accountnew.privateKey.toString()}`);
