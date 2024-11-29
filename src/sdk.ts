@@ -2,7 +2,7 @@ import { AccountModule } from "./modules/accountModule";
 import { PoolModule } from "./modules/poolModule";
 // import { RpcModule } from "./modules/rpcModule";
 import { AptosConfig, Aptos, AptosSettings, Network, MoveStructId } from "@aptos-labs/ts-sdk";
-import { PACKAGE_ID } from "./config";
+import { PACKAGE_ID, TESTNET_FAUCET } from "./config";
 import { TESTNET_FULLNODE, TESTNET_INDEXER } from "./config";
 
 export class FlexSDK {
@@ -11,14 +11,15 @@ export class FlexSDK {
     public Pool: PoolModule
     protected _senderAddress = ''
     public client: Aptos;
-    constructor(options: AptosSettings = { network: Network.CUSTOM, fullnode: TESTNET_FULLNODE, indexer: TESTNET_INDEXER }, privateKey?: string) {
-        this._accountModule = new AccountModule(privateKey);
+    constructor(options: AptosSettings = { network: Network.CUSTOM, fullnode: TESTNET_FULLNODE, indexer: TESTNET_INDEXER, faucet: TESTNET_FAUCET }, privateKey?: string, address?: string) {
+        this._accountModule = new AccountModule(privateKey, address);
         this._senderAddress = this._accountModule.address;
 
         const config = new AptosConfig({
             network: options.network,
             fullnode: options.fullnode,
             indexer: options.indexer,
+            faucet: options.faucet
         });
         this.client = new Aptos(config);
         this.Pool = new PoolModule(this.client, this._senderAddress);

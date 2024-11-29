@@ -1,22 +1,19 @@
-import { AptosConfig, Account as sdkAccount, PrivateKey, Hex, CreateEd25519AccountFromPrivateKeyArgs, Ed25519Account, SigningSchemeInput } from "@aptos-labs/ts-sdk";
+import { AptosConfig, Account, PrivateKey, Hex, CreateEd25519AccountFromPrivateKeyArgs, Ed25519Account, SigningSchemeInput, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import dotenv from 'dotenv';
 import { PrivateKeyVariants } from "@aptos-labs/ts-sdk";
-import { AptosAccount, AptosWallet, HexString } from "@okxweb3/coin-aptos";
-import { Account, Ed25519PrivateKey } from "@okxweb3/coin-aptos/dist/v2";
+
 dotenv.config();
 
 export class AccountModule extends AptosConfig {
 
     protected _privateKey;
-    public wallet: AptosWallet;
     protected _publicAddress;
     public account: Account;
 
-    constructor(privateKey?: string) {
+    constructor(privateKey?: string, address?: string) {
         super();
-        this.wallet = new AptosWallet();
         if (!privateKey) {
-            this._privateKey = sdkAccount.generate().privateKey.toStringWithoutPrefix();
+            this._privateKey = Account.generate().privateKey.toStringWithoutPrefix();
             console.log(`new private key generated: ${this._privateKey}`);
         } else {
             this._privateKey = privateKey.startsWith('0x') ? privateKey.slice(2) : privateKey;

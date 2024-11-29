@@ -8,17 +8,19 @@ dotenv.config();
 const privateKey = process.env.PRIVATE_KEY || '';
 const TESTNET_FULLNODE = process.env.TESTNET_FULLNODE || '';
 const TESTNET_INDEXER = process.env.TESTNET_INDEXER || '';
+const TESTNET_FAUCET = process.env.TESTNET_FAUCET || '';
 console.log(TESTNET_INDEXER);
 const address = process.env.TEST_ADDRESS || '';
 const sdk = new FlexSDK({
     network: Network.CUSTOM,
     fullnode: TESTNET_FULLNODE,
     indexer: TESTNET_INDEXER,
-}, privateKey);
+    faucet: TESTNET_FAUCET
+}, privateKey, '0xe855dfc29aaaa07cbd4c550e982472b41f2d42c23c6b0385eef80e6be4d05be1');
 console.log(`use this address: ${sdk.senderAddress}`);
 sdk.getAccountCoinAmount(address, '0x1::aptos_coin::AptosCoin').then(console.log);
 
-
+// sdk.Pool.transferAptos('0x9913b1442855b7fcf1b93b2616e8495a8863777741af1cbdeebd16a323120bc2', 10).then(console.log);
 // const transaction = await sdk.transaction.build.simple({
 //     sender: sdk.Account.account.accountAddress,
 //     data: {
