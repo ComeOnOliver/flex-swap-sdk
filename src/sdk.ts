@@ -1,50 +1,65 @@
-import { AccountModule } from "./modules/accountModule";
 import { PoolModule } from "./modules/poolModule";
+import { FAModule } from "./modules/FAModule";
+import { CoinModule } from "./modules/coinModule";
 // import { RpcModule } from "./modules/rpcModule";
-import { AptosConfig, Aptos, AptosSettings, Network, MoveStructId } from "@aptos-labs/ts-sdk";
+import { AptosConfig, Aptos, AptosSettings, Network, MoveStructId, Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import { PACKAGE_ID, TESTNET_FAUCET } from "./config";
 import { TESTNET_FULLNODE, TESTNET_INDEXER } from "./config";
+import { MixPoolModule } from "./modules/mixPoolModule";
 
 export class FlexSDK {
 
-    protected _accountModule: AccountModule
-    public Pool: PoolModule
-    protected _senderAddress = ''
-    public client: Aptos;
-    constructor(options: AptosSettings = { network: Network.CUSTOM, fullnode: TESTNET_FULLNODE, indexer: TESTNET_INDEXER, faucet: TESTNET_FAUCET }, privateKey?: string, address?: string) {
-        this._accountModule = new AccountModule(privateKey, address);
-        this._senderAddress = this._accountModule.address;
+    public account: Account;
+    public poolModule: PoolModule;
+    public faModule: FAModule;
+    public mixPoolModule: MixPoolModule;
+    public coinModule: CoinModule;
+    protected senderAddress = '';
+    public aptosClient: Aptos;
+    protected privateKeyHex;
 
-        const config = new AptosConfig({
-            network: options.network,
-            fullnode: options.fullnode,
-            indexer: options.indexer,
-            faucet: options.faucet
+    constructor(settings: AptosSettings = { network: Network.CUSTOM, fullnode: TESTNET_FULLNODE, indexer: TESTNET_INDEXER, faucet: TESTNET_FAUCET }, privateKey?: string) {
+        if (!privateKey) {
+            this.privateKeyHex = Account.generate().privateKey.toStringWithoutPrefix();
+            console.log(`New private key generated: ${this.privateKeyHex}`);
+        } else {
+            this.privateKeyHex = privateKey.startsWith('0x') ? privateKey.slice(2) : privateKey;
+        }
+        const ed25519Key = new Ed25519PrivateKey(this.privateKeyHex.slice(0, 64));
+        // Use asynchronous initialization to ensure account is ready after construction
+        this.account = Account.fromPrivateKey({ privateKey: ed25519Key });
+        this.senderAddress = this.account.accountAddress.toString();
+
+        const aptosConfig = new AptosConfig({
+            network: settings.network || Network.CUSTOM,
+            fullnode: settings.fullnode || TESTNET_FULLNODE,
+            indexer: settings.indexer || TESTNET_INDEXER,
+            faucet: settings.faucet || TESTNET_FAUCET
         });
-        this.client = new Aptos(config);
-        this.Pool = new PoolModule(this.client, this._senderAddress);
+        this.aptosClient = new Aptos(aptosConfig);
+        this.poolModule = new PoolModule(this.aptosClient, this.senderAddress);
+        this.faModule = new FAModule(this.aptosClient, this.senderAddress);
+        this.coinModule = new CoinModule(this.aptosClient, this.senderAddress);
+        this.mixPoolModule = new MixPoolModule(this.aptosClient, this.senderAddress);
     }
 
-    get senderAddress(): String {
-        return this._senderAddress
+    get address(): string {
+        return this.senderAddress;
     }
 
-    set addSender(value: string) {
-        this._senderAddress = value
+    set updateSenderAddress(value: string) {
+        this.senderAddress = value;
     }
 
-    async getAccountCoins(address: string = this._senderAddress) {
-        return await this.client.getAccountCoinsData({ accountAddress: address });
-    }
-    async getAccountCoinAmount(address: string = this._senderAddress, coinType?: MoveStructId) {
-        return await this.client.getAccountCoinAmount({ accountAddress: address, coinType: coinType });
+    async fetchAccountCoins(accountAddress: string = this.senderAddress) {
+        return await this.aptosClient.getAccountCoinsData({ accountAddress });
     }
 
-    get Account(): AccountModule {
-        return this._accountModule
+    async fetchAccountCoinAmount(accountAddress: string = this.senderAddress, coinType: MoveStructId) {
+        return await this.aptosClient.getAccountCoinAmount({ accountAddress, coinType });
     }
 
-    get packageId() {
+    get getPackageId() {
         return PACKAGE_ID;
     }
 }

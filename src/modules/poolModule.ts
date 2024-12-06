@@ -1,5 +1,6 @@
-import { Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, Account, SimpleTransaction, InputGenerateTransactionPayloadData, MoveFunctionId } from "@aptos-labs/ts-sdk";
 import { PACKAGE_ID } from "../config";
+
 export class PoolModule {
 
     protected client: Aptos;
@@ -8,28 +9,107 @@ export class PoolModule {
     constructor(client: Aptos, senderAddress: string) {
         this.client = client;
         this.senderAddress = senderAddress;
+
     }
 
-    async transferAptos(destination: string, amount: number) {
+    async signAndSubmitTransaction(client: Aptos, sender: Account, transaction: SimpleTransaction) {
+        const committedTransaction = await client.signAndSubmitTransaction({
+            transaction,
+            signer: sender,
+        });
 
-        await this.client.fundAccount({ accountAddress: this.senderAddress, amount: 100_000_000 });
-    //     const transaction = await this.client.transaction.build.simple({
-    //         sender: this.senderAddress,
-    //         data: {
-    //             // All transactions on Aptos are implemented via smart contracts.
-    //             function: "0x1::aptos_account::transfer",
-    //             functionArguments: [destination, amount],
-    //         },
-    //     });
+        const executedTransaction = await client.waitForTransaction({ transactionHash: committedTransaction.hash });
+        return executedTransaction;
+    }
 
+    transferAptosData(from: string, destination: string, amount: number) {
+        const data = {
+            function: "0x2abe2aa6370bfdbe6bc3ce22f7dce1345fbc04f47e25dcd97c320468de0414ca::coin_example::transfer" as MoveFunctionId,
+            functionArguments: [from, destination, amount],
 
-    //     const committedTransaction = await this.client.signAndSubmitTransaction({
-    //         transaction,
-    //         signer: this.client.account as any,
-    //     });
+        } as InputGenerateTransactionPayloadData;
+        return data;
+    }
+    async transferAptosTransaction(client: Aptos, from: string, destination: string, amount: number) {
 
-        //     // 5. Wait
-        //     const executedTransaction = await this.client.waitForTransaction({ transactionHash: committedTransaction.hash });
-        //     return executedTransaction;
+        const transaction = await client.transaction.build.simple({
+            sender: from,
+            data: this.transferAptosData(from, destination, amount)
+        });
+        return transaction;
+    }
+    checkBalanceData(coinType: string) {
+        const data = {
+            function: "0x1::fungible_asset::balance" as MoveFunctionId,
+            functionArguments: [coinType],
+            typeArguments: [
+                '0x1::fungible_asset::FungibleStore'
+            ],
+        };
+        return data;
+    }
+    checkMetaDataObject(objectAddress: string) {
+        const data = {
+            function: "0x1::fungible_asset::store_metadata" as MoveFunctionId,
+            functionArguments: [objectAddress],
+            typeArguments: [
+                '0x1::fungible_asset::FungibleStore',
+            ],
+        };
+        return data;
+    }
+    checkIfRegsiterCoinData(user: string, coinType: string) {
+        const data = {
+            function: "0x1::coin::is_account_registered" as MoveFunctionId,
+            functionArguments: [user],
+            typeArguments: [
+                coinType
+            ],
+        };
+        return data;
+    }
+
+    async getCoinPoolInfo(poolId: string) {
+        const url = `http://ec2-34-212-167-187.us-west-2.compute.amazonaws.com:5011/api/CoinPairs/${poolId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+
+        return data;
+    }
+    async getMixPoolInfo(poolId: string) {
+        const url = `http://ec2-34-212-167-187.us-west-2.compute.amazonaws.com:5011/api/FungibleAssetCoinPairs/${poolId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        return data;
+    }
+
+    registerCoinData(coinType: string) {
+        const data = {
+            function: `0x1::managed_coin::register` as MoveFunctionId,
+            functionArguments: [
+            ],
+            typeArguments: [
+                coinType
+            ],
+        } as InputGenerateTransactionPayloadData;
+        return data;
+    }
+
+    async registerCoin(client: Aptos, user: string, coinType: string) {
+        const transaction = await client.transaction.build.simple({
+            sender: user,
+            data: this.registerCoinData(coinType)
+        });
+        return transaction;
     }
 }
