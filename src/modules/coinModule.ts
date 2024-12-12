@@ -33,7 +33,18 @@ export class CoinModule extends PoolModule {
         return transaction;
     }
 
-    createCoinPoolData(coinA: string, coinB: string, xAmount: number, yAmount: number, fee_numerator: number, fee_denominator: number) {
+    async createPoolData(coinA: string, coinB: string, xAmount: number, yAmount: number, fee_numerator: number, fee_denominator: number) {
+
+        //check x less than y
+        const xLessThanY = await this.client.view({
+            payload: this.checkXLessThanYData(coinA, coinB)
+        });
+        console.log(xLessThanY);
+        console.log(xLessThanY[0]);
+        if (xLessThanY[0] == false) {
+            [coinA, coinB] = [coinB, coinA];
+            [xAmount, yAmount] = [yAmount, xAmount];
+        }
 
         const data = {
             function: `${PACKAGE_ID}::coin_pair_service::initialize_liquidity` as MoveFunctionId,
@@ -54,13 +65,13 @@ export class CoinModule extends PoolModule {
     async createCoinPool(client: Aptos, user: string, coinA: string, coinB: string, xAmount: number, yAmount: number, fee_numerator: number, fee_denominator: number) {
         const transaction = await client.transaction.build.simple({
             sender: user,
-            data: this.createCoinPoolData(coinA, coinB, xAmount, yAmount, fee_numerator, fee_denominator)
+            data: await this.createPoolData(coinA, coinB, xAmount, yAmount, fee_numerator, fee_denominator)
         });
         return transaction;
     }
 
     async swapCoinData(poolId: string, a2b: boolean, amount: number, minimumYAmount: number) {
-        const poolInfo = await this.getCoinPoolInfo(poolId);
+        const poolInfo = await this.getPoolInfo(poolId);
         const coinA = poolInfo.x_TokenType;
         const coinB = poolInfo.y_TokenType;
 
@@ -105,7 +116,7 @@ export class CoinModule extends PoolModule {
     }
 
     async addLiquidityData(poolId: string, xAmount: number, yAmount: number) {
-        const poolInfo = await this.getCoinPoolInfo(poolId);
+        const poolInfo = await this.getPoolInfo(poolId);
         const coinA = poolInfo.x_TokenType;
         const coinB = poolInfo.y_TokenType;
 
@@ -134,7 +145,7 @@ export class CoinModule extends PoolModule {
     }
 
     async removeLiquidityData(poolId: string, liquidityAmount: number) {
-        const poolInfo = await this.getCoinPoolInfo(poolId);
+        const poolInfo = await this.getPoolInfo(poolId);
         const coinA = poolInfo.x_TokenType;
         const coinB = poolInfo.y_TokenType;
 
@@ -163,7 +174,7 @@ export class CoinModule extends PoolModule {
     }
 
     async burnLiquidityData(poolId: string, liquidityAmount: number) {
-        const poolInfo = await this.getCoinPoolInfo(poolId);
+        const poolInfo = await this.getPoolInfo(poolId);
         const coinA = poolInfo.x_TokenType;
         const coinB = poolInfo.y_TokenType;
 

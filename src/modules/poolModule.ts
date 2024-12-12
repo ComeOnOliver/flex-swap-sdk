@@ -1,5 +1,5 @@
 import { Aptos, AptosConfig, Account, SimpleTransaction, InputGenerateTransactionPayloadData, MoveFunctionId } from "@aptos-labs/ts-sdk";
-import { PACKAGE_ID } from "../config";
+import { INTERNAL_INDEXER, INTERNAL_RESERVE_INDEXER, PACKAGE_ID } from "../config";
 
 export class PoolModule {
 
@@ -68,9 +68,48 @@ export class PoolModule {
         };
         return data;
     }
+    checkXLessThanYData(x: string, y: string) {
+        const data = {
+            function: `${PACKAGE_ID}::token_util::is_type_less_than` as MoveFunctionId,
+            functionArguments: [
+            ],
+            typeArguments: [
+                x,
+                y
+            ],
+        };
+        return data;
+    }
+    checkAddressXLessThanYData(x: string, y: string) {
+        const data = {
+            function: `${PACKAGE_ID}::token_util::is_address_less_than` as MoveFunctionId,
+            functionArguments: [
+                x,
+                y
+            ],
+        };
+        return data;
+    }
+    async getSwapYPriceData(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+        const reserveInfo = await this.getPoolInfo(poolId);
 
-    async getCoinPoolInfo(poolId: string) {
-        const url = `http://ec2-34-212-167-187.us-west-2.compute.amazonaws.com:5011/api/CoinPairs/${poolId}`;
+        const [reserveA, reserveB] = a2b ? [reserveInfo.x_ReserveValue, reserveInfo.y_ReserveValue] : [reserveInfo.y_ReserveValue, reserveInfo.x_ReserveValue];
+        const { feeNumerator, feeDenominator } = reserveInfo;
+        return {
+            function: `${PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
+            functionArguments: [
+                reserveA,
+                reserveB,
+                amount,
+                minimumYAmount,
+                feeNumerator,
+                feeDenominator
+            ],
+        };
+    }
+
+    async getPoolInfo(poolId: string) {
+        const url = `${INTERNAL_INDEXER}/${poolId}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -78,11 +117,11 @@ export class PoolModule {
             }
         });
         const data = await response.json();
-
         return data;
     }
-    async getMixPoolInfo(poolId: string) {
-        const url = `http://ec2-34-212-167-187.us-west-2.compute.amazonaws.com:5011/api/FungibleAssetCoinPairs/${poolId}`;
+
+    async getReserveInfo(poolId: string) {
+        const url = `${INTERNAL_RESERVE_INDEXER}/${poolId}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -104,7 +143,6 @@ export class PoolModule {
         } as InputGenerateTransactionPayloadData;
         return data;
     }
-
     async registerCoin(client: Aptos, user: string, coinType: string) {
         const transaction = await client.transaction.build.simple({
             sender: user,

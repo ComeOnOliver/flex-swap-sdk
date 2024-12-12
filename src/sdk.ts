@@ -62,4 +62,24 @@ export class FlexSDK {
     get getPackageId() {
         return PACKAGE_ID;
     }
+
+
+    //check x less than y
+    async checkXLessThanY(x: string, y: string) {
+        return await this.aptosClient.view({
+            payload: this.poolModule.checkXLessThanYData(x, y)
+        });
+    }
+
+    async checkAddressXLessThanY(x: string, y: string) {
+        return await this.aptosClient.view({
+            payload: this.poolModule.checkAddressXLessThanYData(x, y)
+        });
+    }
+
+    async getSwapYPrice(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+        return await this.aptosClient.view({
+            payload: await this.poolModule.getSwapYPriceData(poolId, amount, a2b, minimumYAmount)
+        });
+    }
 }
