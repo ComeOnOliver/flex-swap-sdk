@@ -1,6 +1,8 @@
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import dotenv from 'dotenv';
 import { FlexSDK } from "./sdk";
+import { PoolModule } from "./modules/poolModule";
+import { FAModule } from "./modules/FAModule";
 dotenv.config();
 
 // Specify which network to connect to via AptosConfig
@@ -111,6 +113,41 @@ sdk.coinModule.createCoinPool(sdk.aptosClient, sdk.address, coinE, coinF, 1000e6
 
 
 //get swap price
-const poolId = '0x5742efa7cbe4aec968e0235a0778add5d26f6447cf6c71ee912990557ce68554';
-sdk.getSwapYPrice(poolId, 10e8, true, 0).then(console.log);
+// const poolId = '0x5742efa7cbe4aec968e0235a0778add5d26f6447cf6c71ee912990557ce68554';
+// sdk.getSwapYPrice(poolId, 10e8, true, 0).then(console.log);
+
+
+///////////////////////////////////////////////////////////////
+//get swap price
+//1. get pool id, select coinA and coinB and query the api, should return the pool id, like this: 0x5742efa7cbe4aec968e0235a0778add5d26f6447cf6c71ee912990557ce68554
+//2. get swap price, pass the poolid, amount of either x or y, and a2b, minimumYAmount (slippage)
+//e.g. if to swap 10 usdc to USDT, which is a2b = True
+//sdk.poolModule.getSwapYPriceData(USDC_USDT_POOL_ID, 10e6, true, 0).then(console.log);
+//This is will return the amount of USDT that you expected to get
+
+//e.g. if to swap 10 USDT to USDC, which is a2b = False
+//sdk.poolModule.getSwapYPriceData(USDC_USDT_POOL_ID, 10e6, false, 0).then(console.log);
+//This is will return the amount of USDC you expected to get
+
+//3. clean decimals or round up
+
+///////////////////////////////////////////////////////////////
+//how to get my pools
+//1. get all coins from wallet like this: sdk.fetchAccountCoins(sdk.address).then(console.log);
+//2. filter those coins with coinType = 'liquidity', get their poolId -> 这步还没跑通
+//3. based on the poolId, get users' liquidity amount for each coinA and coinB
+
+
+///////////////////////////////////////////////////////////////
+//how to add liquidity to a pool
+//1. get poolId by using the indexer, https://aptos-testnet.api.flextech.xyz:443/api/TokenPairs/byTokenTypes
+// e.g.
+//xTokenType = 0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::moon_coin::MoonCoin
+//yTokenType = 0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::mars_coin::MarsCoin
+//2. Pass in the poolId, and the amount of x and y you want to add to function addLiquidity based on their coinType
+// e.g.xTokenType/yTokenType are both v2 coin, then use FAModule.addLiquidity
+//FAModule.addLiquidity(sdk.aptosClient, sdk.address, poolId, 10e8, 10e8)
+
+//if xTokenType/yTokenType are both v1 coin, then use CoinModule.addLiquidity
+//CoinModule.addLiquidity(sdk.aptosClient, sdk.address, poolId, 10e8, 10e8)
 
