@@ -150,4 +150,24 @@ export class PoolModule {
         });
         return transaction;
     }
+
+    protected async calculateSwapYPriceData(reserveInfoData: any, amount: number, a2b: boolean, minimumYAmount: number) {
+
+        const [reserveA, reserveB] = a2b ? [Number(reserveInfoData.x_reserve.value), Number(reserveInfoData.y_reserve.value)] : [Number(reserveInfoData.y_reserve.value), Number(reserveInfoData.x_reserve.value)];
+        const feeNumerator = reserveInfoData.fee_numerator;
+        const feeDenominator = reserveInfoData.fee_denominator;
+
+        return {
+            function: `${PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
+            functionArguments: [
+                reserveA,
+                reserveB,
+                amount,
+                minimumYAmount,
+                feeNumerator,
+                feeDenominator
+            ],
+        };
+    }
+
 }

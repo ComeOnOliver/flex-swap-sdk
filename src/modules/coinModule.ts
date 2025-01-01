@@ -1,6 +1,6 @@
 import { Aptos, AptosConfig, Account, SimpleTransaction, InputGenerateTransactionPayloadData, MoveFunctionId } from "@aptos-labs/ts-sdk";
 import { PoolModule } from "./poolModule";
-import { PACKAGE_ID } from "../config";
+import { PACKAGE_ID, INTERNAL_INDEXER_URL } from "../config";
 
 export class CoinModule extends PoolModule {
 
@@ -199,4 +199,23 @@ export class CoinModule extends PoolModule {
         });
         return transaction;
     }
+
+    async getPoolMetaData(poolId: string) {
+        const poolInfo = await this.getPoolInfo(poolId);
+        const tokenAType = poolInfo.x_TokenType;
+        const tokenBType = poolInfo.y_TokenType;
+        const poolType = `${PACKAGE_ID}::coin_pair::CoinPair<${tokenAType},${tokenBType}>`;
+        const fetchUrl = `${INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
+        const response = await fetch(fetchUrl);
+        const data = await response.json();
+        return data;
+    }
+
+    async getSwapYPriceData(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+        const reserveInfo = await this.getPoolMetaData(poolId);
+        const reserveInfoData = reserveInfo.data;
+
+        return this.calculateSwapYPriceData(reserveInfoData, amount, a2b, minimumYAmount);
+    }
+
 }

@@ -9,5 +9,6 @@ export const TESTNET_FULLNODE = "https://api.testnet.aptoslabs.com/v1";
 export const TESTNET_FAUCET = "https://aptos.dev/en/network/faucet";
 export const TESTNET_INDEXER = "https://api.testnet.aptoslabs.com/v1/graphql";
 export const PACKAGE_ID = "0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7";
+export const INTERNAL_INDEXER_URL = "https://fullnode.testnet.aptoslabs.com/v1";
 export const INTERNAL_INDEXER = "https://aptos-testnet.api.flextech.xyz:443/api/TokenPairs";
 export const INTERNAL_RESERVE_INDEXER = "https://aptos-testnet.api.flextech.xyz:443/api/TokenPairPrices";

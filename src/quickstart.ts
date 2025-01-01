@@ -1,16 +1,14 @@
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import dotenv from 'dotenv';
+import dotenv, { config } from 'dotenv';
 import { FlexSDK } from "./sdk";
 import { PoolModule } from "./modules/poolModule";
 import { FAModule } from "./modules/FAModule";
 dotenv.config();
-
+import { TESTNET_FULLNODE, TESTNET_INDEXER, TESTNET_FAUCET } from "./config";
 // Specify which network to connect to via AptosConfig
 
 const privateKey = process.env.PRIVATE_KEY || '';
-const TESTNET_FULLNODE = process.env.TESTNET_FULLNODE || '';
-const TESTNET_INDEXER = process.env.TESTNET_INDEXER || '';
-const TESTNET_FAUCET = process.env.TESTNET_FAUCET || '';
+
 console.log(TESTNET_INDEXER);
 const sdk = new FlexSDK({
     network: Network.CUSTOM,
@@ -19,7 +17,7 @@ const sdk = new FlexSDK({
     faucet: TESTNET_FAUCET
 }, privateKey);
 console.log(`use this address: ${sdk.address}`);
-sdk.fetchAccountCoinAmount(sdk.address, '0x1::aptos_coin::AptosCoin').then(console.log);
+// sdk.fetchAccountCoinAmount(sdk.address, '0x1::aptos_coin::AptosCoin').then(console.log);
 // sdk.fetchAccountCoins(sdk.address).then(console.log);
 
 // 查看 FungibleStore 的 metadata
@@ -34,11 +32,11 @@ sdk.fetchAccountCoinAmount(sdk.address, '0x1::aptos_coin::AptosCoin').then(conso
 
 const coinC = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC';
 const coinD = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDT';
-sdk.checkXLessThanY(coinC, coinD).then(console.log);
+// sdk.checkXLessThanY(coinC, coinD).then(console.log);
 
 const coinA = '0x8efdee21af9001750b91fad222fc4b6383aa984ca393cbef5555a74554af8185';
 const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb7';
-sdk.checkAddressXLessThanY(coinA, coinB).then(console.log);
+// sdk.checkAddressXLessThanY(coinA, coinB).then(console.log);
 //注册 coin---------------------------------------------------------------------------------
 // sdk.coinModule.registerCoin(sdk.aptosClient, sdk.address, '0x2abe2aa6370bfdbe6bc3ce22f7dce1345fbc04f47e25dcd97c320468de0414ca::mars_coin::MarsCoin').then(async transaction => {
 //     await sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);    
@@ -46,20 +44,20 @@ sdk.checkAddressXLessThanY(coinA, coinB).then(console.log);
 
 //创建 coin Pool---------------------------------------------------------------------------------
 // 1. 拿到所有用户有的coin
-sdk.fetchAccountCoins(sdk.address).then(console.log);
+// sdk.fetchAccountCoins(sdk.address).then(console.log);
 // 2. 选择两个 coin 并拿到他们的 coinType， 比如 0x2abe2aa6370bfdbe6bc3ce22f7dce1345fbc04f47e25dcd97c320468de0414ca::mars_coin::MarsCoin 和 0x1::aptos_coin::AptosCoin
 // 3. 创建 coin Pool
-const coinE = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDT';
-const coinF = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC';
+// const coinE = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDT';
+// const coinF = '0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC';
 
 //确定都已经 register Coin 了
 // sdk.aptosClient.view({
 //     payload: sdk.coinModule.checkIfRegsiterCoinData(sdk.address, coinA)
 // }).then(console.log);
 
-sdk.coinModule.createCoinPool(sdk.aptosClient, sdk.address, coinE, coinF, 1000e6, 1000e6, 3, 1000).then(transaction => {
-    sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);
-});
+// sdk.coinModule.createCoinPool(sdk.aptosClient, sdk.address, coinE, coinF, 1000e6, 1000e6, 3, 1000).then(transaction => {
+//     sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);
+// });
 //得到 poolID = 0x23ad6d92e1b7bf22dbfa6f41c74862962b7d2c5d7c86cd633fb015793db31cb6
 
 // 4. swap coin
@@ -151,3 +149,10 @@ sdk.coinModule.createCoinPool(sdk.aptosClient, sdk.address, coinE, coinF, 1000e6
 //if xTokenType/yTokenType are both v1 coin, then use CoinModule.addLiquidity
 //CoinModule.addLiquidity(sdk.aptosClient, sdk.address, poolId, 10e8, 10e8)
 
+// sdk.coinModule.getPoolMetaData('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a').then(console.log);
+// sdk.mixPoolModule.getPoolMetaData('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6').then(console.log);
+// sdk.faModule.getPoolMetaData('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c').then(console.log);    
+
+sdk.getSwapYPrice('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a', 10e8, true, 0, 'coin').then(console.log);
+sdk.getSwapYPrice('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6', 10e8, true, 0, 'mix').then(console.log);
+sdk.getSwapYPrice('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c', 10e8, true, 0, 'fa').then(console.log);

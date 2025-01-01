@@ -1,6 +1,6 @@
 import { Aptos, AptosConfig, Account, SimpleTransaction, InputGenerateTransactionPayloadData, MoveFunctionId } from "@aptos-labs/ts-sdk";
 import { PoolModule } from "./poolModule";
-import { PACKAGE_ID } from "../config";
+import { INTERNAL_INDEXER_URL, PACKAGE_ID } from "../config";
 
 export class MixPoolModule extends PoolModule {
 
@@ -173,5 +173,30 @@ export class MixPoolModule extends PoolModule {
             data: await this.burnLiquidityData(poolId, liquidityAmount)
         });
         return transaction;
+    }
+
+    async getPoolMetaData(poolId: string) {
+        const poolInfo = await this.getPoolInfo(poolId);
+        const tokenAType = poolInfo.x_TokenType;
+        const tokenBType = poolInfo.y_TokenType;
+        const poolType = `${PACKAGE_ID}::fungible_asset_coin_pair::FungibleAssetCoinPair<${tokenBType}>`;
+
+        const fetchUrl = `${INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
+        const response = await fetch(fetchUrl);
+        let data = await response.json();
+        const faTokenBalance = data.data.x_reserve.inner;
+
+        const fetchUrl2 = `${INTERNAL_INDEXER_URL}/accounts/${faTokenBalance}/resource/0x1::fungible_asset::FungibleStore`;
+        const response2 = await fetch(fetchUrl2);
+        const data2 = await response2.json();
+        const xBalance = data2.data.balance;
+        data.data.x_reserve = { value: xBalance };
+        return data;
+    }
+
+    async getSwapYPriceData(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+        const reserveInfo = await this.getPoolMetaData(poolId);
+        const reserveInfoData = reserveInfo.data;
+        return this.calculateSwapYPriceData(reserveInfoData, amount, a2b, minimumYAmount);
     }
 }

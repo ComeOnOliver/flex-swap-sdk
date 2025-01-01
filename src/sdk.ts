@@ -77,9 +77,25 @@ export class FlexSDK {
         });
     }
 
-    async getSwapYPrice(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
-        return await this.aptosClient.view({
-            payload: await this.poolModule.getSwapYPriceData(poolId, amount, a2b, minimumYAmount)
+    async getSwapYPrice(poolId: string, amount: number, a2b: boolean, minimumYAmount: number, poolType: 'coin' | 'mix' | 'fa') {
+        const moduleMap = {
+            'coin': this.coinModule,
+            'mix': this.mixPoolModule,
+            'fa': this.faModule
+        } as const;
+
+        const selectedModule = moduleMap[poolType];
+        if (selectedModule) {
+            const payload = await selectedModule.getSwapYPriceData(poolId, amount, a2b, minimumYAmount);
+            return await this.aptosClient.view({ payload });
+        }
+        throw new Error(`Unsupported pool type: ${poolType}`);
+    }
+
+    async getPoolMetaData(poolId: string) {
+        return await this.aptosClient.getAccountResources({
+            accountAddress: poolId,
+
         });
     }
 }
