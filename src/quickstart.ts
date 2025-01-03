@@ -153,6 +153,14 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 // sdk.mixPoolModule.getPoolMetaData('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6').then(console.log);
 // sdk.faModule.getPoolMetaData('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c').then(console.log);    
 
-sdk.getSwapYPrice('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a', 10e8, true, 0, 'coin').then(console.log);
-sdk.getSwapYPrice('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6', 10e8, true, 0, 'mix').then(console.log);
-sdk.getSwapYPrice('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c', 10e8, true, 0, 'fa').then(console.log);
+// sdk.getSwapYPrice('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a', 10e8, true, 0, 'coin').then(console.log);
+// sdk.getSwapYPrice('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6', 10e8, true, 0, 'mix').then(console.log);
+// sdk.getSwapYPrice('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c', 10e8, true, 0, 'fa').then(console.log);
+
+sdk.getPoolInfoByTokens('0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::moon_coin::MoonCoin',
+    '0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::fake_usd::FakeUSD').then(console.log);
+
+
+sdk.getPoolInfoByTokens('0xc76079ce147d055b7f196893e97e7fa547ac74dab5076b24a509dd4740e6ffeb',
+    '0xdc0f7602d5ec10c13729ce1a3e97e66b7678f0c22bee347c568c63fe5a01d9cd').then(console.log);
+

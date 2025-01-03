@@ -3,7 +3,7 @@ import { FAModule } from "./modules/FAModule";
 import { CoinModule } from "./modules/coinModule";
 // import { RpcModule } from "./modules/rpcModule";
 import { AptosConfig, Aptos, AptosSettings, Network, MoveStructId, Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
-import { PACKAGE_ID, TESTNET_FAUCET } from "./config";
+import { INTERNAL_INDEXER, PACKAGE_ID, TESTNET_FAUCET } from "./config";
 import { TESTNET_FULLNODE, TESTNET_INDEXER } from "./config";
 import { MixPoolModule } from "./modules/mixPoolModule";
 
@@ -97,5 +97,39 @@ export class FlexSDK {
             accountAddress: poolId,
 
         });
+    }
+
+    async getPoolInfoByTokens(tokenA: string, tokenB: string) {
+        const isTokenAV1 = tokenA.includes('::');
+        const isTokenBV1 = tokenB.includes('::');
+        let x = tokenA, y = tokenB;
+
+        if (!isTokenAV1 && !isTokenBV1) {
+            // Both tokens are v2
+            const isXLessThanY = await this.checkAddressXLessThanY(tokenA, tokenB);
+            const result = isXLessThanY[0];
+            if (!result) {
+                x = tokenB;
+                y = tokenA;
+            }
+        } else if (isTokenAV1 && isTokenBV1) {
+            // Both tokens are v1
+            const isXLessThanY = await this.checkXLessThanY(tokenA, tokenB);
+            const result = isXLessThanY[0];
+            if (!result) {
+                x = tokenB;
+                y = tokenA;
+            }
+        } else {
+            // One token is v1, the other is v2
+            if (isTokenAV1) {
+                x = tokenB;
+                y = tokenA;
+            }
+        }
+        const fetchUrl = `${INTERNAL_INDEXER}/selectedOneByTokenTypes?xTokenType=${x}&yTokenType=${y}`;
+        const response = await fetch(fetchUrl);
+        const data = await response.json();
+        return data;
     }
 }
