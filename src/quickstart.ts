@@ -1,21 +1,23 @@
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import dotenv, { config } from 'dotenv';
-import { FlexSDK } from "./sdk";
-import { PoolModule } from "./modules/poolModule";
-import { FAModule } from "./modules/FAModule";
+import { Network } from '@aptos-labs/ts-sdk';
+import dotenv from 'dotenv';
+
+import { TESTNET_FAUCET, TESTNET_FULLNODE, TESTNET_INDEXER } from './config';
+import { FlexSDK } from './sdk';
 dotenv.config();
-import { TESTNET_FULLNODE, TESTNET_INDEXER, TESTNET_FAUCET } from "./config";
 // Specify which network to connect to via AptosConfig
 
 const privateKey = process.env.PRIVATE_KEY || '';
 
 console.log(TESTNET_INDEXER);
-const sdk = new FlexSDK({
+const sdk = new FlexSDK(
+  {
     network: Network.CUSTOM,
     fullnode: TESTNET_FULLNODE,
     indexer: TESTNET_INDEXER,
-    faucet: TESTNET_FAUCET
-}, privateKey);
+    faucet: TESTNET_FAUCET,
+  },
+  privateKey
+);
 console.log(`use this address: ${sdk.address}`);
 // sdk.fetchAccountCoinAmount(sdk.address, '0x1::aptos_coin::AptosCoin').then(console.log);
 // sdk.fetchAccountCoins(sdk.address).then(console.log);
@@ -39,7 +41,7 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 // sdk.checkAddressXLessThanY(coinA, coinB).then(console.log);
 //注册 coin---------------------------------------------------------------------------------
 // sdk.coinModule.registerCoin(sdk.aptosClient, sdk.address, '0x2abe2aa6370bfdbe6bc3ce22f7dce1345fbc04f47e25dcd97c320468de0414ca::mars_coin::MarsCoin').then(async transaction => {
-//     await sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);    
+//     await sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);
 // });
 
 //创建 coin Pool---------------------------------------------------------------------------------
@@ -109,18 +111,16 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 //     sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction).then(console.log);
 // });
 
-
 //get swap price
 // const poolId = '0x5742efa7cbe4aec968e0235a0778add5d26f6447cf6c71ee912990557ce68554';
 // sdk.getSwapYPrice(poolId, 10e8, true, 0).then(console.log);
-
 
 ///////////////////////////////////////////////////////////////
 //get swap price
 //1. get pool id, select coinA and coinB and query the api, should return the pool id, like this: 0x5742efa7cbe4aec968e0235a0778add5d26f6447cf6c71ee912990557ce68554
 //2. get swap price, pass the poolid, amount of either x or y, and a2b, minimumYAmount (slippage)
 //e.g. if to swap 10 usdc to USDT, which is a2b = True
-//sdk.poolModule.getSwapYPriceData(USDC_USDT_POOL_ID, 10e6, true, 0).then(console.log);
+
 //This is will return the amount of USDT that you expected to get
 
 //e.g. if to swap 10 USDT to USDC, which is a2b = False
@@ -134,7 +134,6 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 //1. get all coins from wallet like this: sdk.fetchAccountCoins(sdk.address).then(console.log);
 //2. filter those coins with coinType = 'liquidity', get their poolId -> 这步还没跑通
 //3. based on the poolId, get users' liquidity amount for each coinA and coinB
-
 
 ///////////////////////////////////////////////////////////////
 //how to add liquidity to a pool
@@ -151,16 +150,78 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 
 // sdk.coinModule.getPoolMetaData('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a').then(console.log);
 // sdk.mixPoolModule.getPoolMetaData('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6').then(console.log);
-// sdk.faModule.getPoolMetaData('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c').then(console.log);    
+// sdk.faModule.getPoolMetaData('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c').then(console.log);
 
 // sdk.getSwapYPrice('0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a', 10e8, true, 0, 'coin').then(console.log);
 // sdk.getSwapYPrice('0x73af1a64143f3c092dcbba56100f15529bac05402839420a1822081672160ca6', 10e8, true, 0, 'mix').then(console.log);
 // sdk.getSwapYPrice('0x3f51c22fe5a3a903fb447fa44601e3155c83629cce5149c3a34e38118a9c589c', 10e8, true, 0, 'fa').then(console.log);
 
-sdk.getPoolInfoByTokens('0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::moon_coin::MoonCoin',
-    '0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::fake_usd::FakeUSD').then(console.log);
+// sdk.getPoolInfoByTokens('0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::moon_coin::MoonCoin',
+//     '0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::fake_usd::FakeUSD').then(console.log);
 
+// sdk.getPoolInfoByTokens('0xc76079ce147d055b7f196893e97e7fa547ac74dab5076b24a509dd4740e6ffeb',
+//     '0xdc0f7602d5ec10c13729ce1a3e97e66b7678f0c22bee347c568c63fe5a01d9cd').then(console.log);
 
-sdk.getPoolInfoByTokens('0xc76079ce147d055b7f196893e97e7fa547ac74dab5076b24a509dd4740e6ffeb',
-    '0xdc0f7602d5ec10c13729ce1a3e97e66b7678f0c22bee347c568c63fe5a01d9cd').then(console.log);
+// sdk.getPoolIdBasedOnLiquidityToken('0x10724aa138a7d5f49b93f21079f1626b80fca5236b897d084246d46b97af0c0f').then(poolId => {
 
+//   sdk.getPoolMetaData(poolId).then(console.log);
+// });
+
+// sdk.poolModule
+//   .getFATokenInfo(
+//     sdk.aptosClient,
+//     "0x9a78e5e6dd0dae2550c4e56659b7dc7ded43c3fc9591eac636d89383bfcaffa"
+//   )
+//   .then(console.log);
+
+// sdk.coinModule
+//   .getCoinInfo(
+//     sdk.aptosClient,
+//     "0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::fake_usd::FakeUSD"
+//   )
+//   .then(console.log);
+
+// sdk.poolModule.calculateLiquidity(sdk.aptosClient, 11998100, 200643897, 6614880151, 2000000, 6000000).then(console.log);
+
+// sdk.poolModule.getCoinInfo(sdk.aptosClient,
+//   '0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::fake_usd::FakeUSD'
+// ).then(res => {
+//   console.log(res);
+// })
+
+// sdk.poolModule
+//   .getCoinInfo(
+//     sdk.aptosClient,
+//     '0xe8e1806fb3e05ba81c908e2496a94ac43d64edd900afa90272331eade684f2c7::moon_coin::MoonCoin'
+//   )
+//   .then((res) => {
+//     console.log(res);
+//   });
+
+sdk
+  .getSwapYPrice(
+    '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
+    10e4,
+    true,
+    0,
+    'coin'
+  )
+  .then(console.log);
+// sdk.poolModule
+//   .getSwapYPriceData(
+//     '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
+//     10e6,
+//     true,
+//     0
+//   )
+//   .then(console.log);
+
+sdk.poolModule
+  .getSwapYPriceByAmountOut(
+    '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
+    false,
+    2292037
+  )
+  .then((result) => {
+    console.log(`resr`, result);
+  });
