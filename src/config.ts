@@ -14,7 +14,8 @@
 // export const INTERNAL_RESERVE_INDEXER =
 //   'https://aptos-testnet.api.flextech.xyz:443/api/TokenPairPrices';
 
-import { MOVEMENT_NETWORK } from '@/types';
+export type MOVEMENT_NETWORK = "Bardock Testnet" | "Mainnet";
+
 export interface SDKConfig {
   FULLNODE: string;
   FAUCET: string;
