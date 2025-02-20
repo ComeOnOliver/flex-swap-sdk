@@ -3,44 +3,32 @@ import {
   Account,
   Aptos,
   AptosConfig,
-  AptosSettings,
   Ed25519PrivateKey,
   MoveStructId,
   Network,
 } from '@aptos-labs/ts-sdk';
 
-import {
-  INTERNAL_INDEXER,
-  INTERNAL_INDEXER_URL,
-  PACKAGE_ID,
-  TESTNET_FAUCET,
-  TESTNET_FULLNODE,
-  TESTNET_INDEXER,
-} from './config';
+import { SDKConfig } from './config';
 import { CoinModule } from './modules/coinModule';
 import { FAModule } from './modules/FAModule';
+import { LunchpadModule } from './modules/lunchpad';
 import { MixPoolModule } from './modules/mixPoolModule';
 import { PoolModule } from './modules/poolModule';
 
 export class FlexSDK {
+  public config: SDKConfig;
   public account: Account;
   public poolModule: PoolModule;
   public faModule: FAModule;
   public mixPoolModule: MixPoolModule;
   public coinModule: CoinModule;
+  public lunchpadModule: LunchpadModule;
   protected senderAddress = '';
   public aptosClient: Aptos;
   protected privateKeyHex;
 
-  constructor(
-    settings: AptosSettings = {
-      network: Network.CUSTOM,
-      fullnode: TESTNET_FULLNODE,
-      indexer: TESTNET_INDEXER,
-      faucet: TESTNET_FAUCET,
-    },
-    privateKey?: string
-  ) {
+  constructor(config: SDKConfig, privateKey?: string) {
+    this.config = config;
     if (!privateKey) {
       this.privateKeyHex = Account.generate().privateKey.toStringWithoutPrefix();
       console.log(`New private key generated: ${this.privateKeyHex}`);
@@ -53,16 +41,17 @@ export class FlexSDK {
     this.senderAddress = this.account.accountAddress.toString();
 
     const aptosConfig = new AptosConfig({
-      network: settings.network || Network.CUSTOM,
-      fullnode: settings.fullnode || TESTNET_FULLNODE,
-      indexer: settings.indexer || TESTNET_INDEXER,
-      faucet: settings.faucet || TESTNET_FAUCET,
+      network: Network.CUSTOM,
+      fullnode: config.FULLNODE,
+      indexer: config.INDEXER,
+      faucet: config.FAUCET,
     });
     this.aptosClient = new Aptos(aptosConfig);
-    this.poolModule = new PoolModule(this.aptosClient, this.senderAddress);
-    this.faModule = new FAModule(this.aptosClient, this.senderAddress);
-    this.coinModule = new CoinModule(this.aptosClient, this.senderAddress);
-    this.mixPoolModule = new MixPoolModule(this.aptosClient, this.senderAddress);
+    this.poolModule = new PoolModule(this.aptosClient, this.senderAddress, this.config);
+    this.faModule = new FAModule(this.aptosClient, this.senderAddress, this.config);
+    this.coinModule = new CoinModule(this.aptosClient, this.senderAddress, this.config);
+    this.mixPoolModule = new MixPoolModule(this.aptosClient, this.senderAddress, this.config);
+    this.lunchpadModule = new LunchpadModule(this.aptosClient, this.senderAddress, this.config);
   }
 
   get address(): string {
@@ -85,7 +74,7 @@ export class FlexSDK {
   }
 
   get getPackageId() {
-    return PACKAGE_ID;
+    return this.config.PACKAGE_ID;
   }
 
   //check x less than y
@@ -157,14 +146,14 @@ export class FlexSDK {
         y = tokenA;
       }
     }
-    const fetchUrl = `${INTERNAL_INDEXER}/distinct/byTokenTypes?xTokenType=${x}&yTokenType=${y}`;
+    const fetchUrl = `${this.config.INTERNAL_INDEXER}/distinct/byTokenTypes?xTokenType=${x}&yTokenType=${y}`;
     const response = await fetch(fetchUrl);
     const data = await response.json();
     return data;
   }
 
   async getPoolIdBasedOnLiquidityToken(liquidityTokenId: string) {
-    const fetchUrl = `${INTERNAL_INDEXER_URL}/accounts/${liquidityTokenId}/resource/0x1::object::ObjectCore`;
+    const fetchUrl = `${this.config.INTERNAL_INDEXER}/accounts/${liquidityTokenId}/resource/0x1::object::ObjectCore`;
 
     const response = await fetch(fetchUrl, {
       method: 'GET',

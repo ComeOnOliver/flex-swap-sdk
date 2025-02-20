@@ -1,23 +1,15 @@
-import { Network } from '@aptos-labs/ts-sdk';
 import dotenv from 'dotenv';
 
-import { TESTNET_FAUCET, TESTNET_FULLNODE, TESTNET_INDEXER } from './config';
+import { CONFIG } from './config';
 import { FlexSDK } from './sdk';
+
 dotenv.config();
 // Specify which network to connect to via AptosConfig
 
 const privateKey = process.env.PRIVATE_KEY || '';
 
-console.log(TESTNET_INDEXER);
-const sdk = new FlexSDK(
-  {
-    network: Network.CUSTOM,
-    fullnode: TESTNET_FULLNODE,
-    indexer: TESTNET_INDEXER,
-    faucet: TESTNET_FAUCET,
-  },
-  privateKey
-);
+console.log(CONFIG['Bardock Testnet']);
+const sdk = new FlexSDK(CONFIG['Bardock Testnet'], privateKey);
 console.log(`use this address: ${sdk.address}`);
 // sdk.fetchAccountCoinAmount(sdk.address, '0x1::aptos_coin::AptosCoin').then(console.log);
 // sdk.fetchAccountCoins(sdk.address).then(console.log);
@@ -198,15 +190,15 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 //     console.log(res);
 //   });
 
-sdk
-  .getSwapYPrice(
-    '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
-    10e4,
-    true,
-    0,
-    'coin'
-  )
-  .then(console.log);
+// sdk
+//   .getSwapYPrice(
+//     '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
+//     10e4,
+//     true,
+//     0,
+//     'coin'
+//   )
+//   .then(console.log);
 // sdk.poolModule
 //   .getSwapYPriceData(
 //     '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
@@ -216,12 +208,96 @@ sdk
 //   )
 //   .then(console.log);
 
-sdk.poolModule
-  .getSwapYPriceByAmountOut(
-    '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
-    false,
-    2292037
+// sdk.poolModule
+//   .getSwapYPriceByAmountOut(
+//     '0x22b7ffd4787cd64f1345464d1fe76c2f7626589c6c094af254533f5d84370d2a',
+//     false,
+//     2292037
+//   )
+//   .then((result) => {
+//     console.log(`resr`, result);
+//   });
+
+sdk.lunchpadModule
+  .getCollateralPrice(
+    '0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429',
+    9,
+    799820983000000000
   )
-  .then((result) => {
-    console.log(`resr`, result);
-  });
+  .then(console.log);
+
+sdk.lunchpadModule
+  .getLaunchPoolState('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429')
+  .then(console.log);
+
+//Sample
+// Output:{
+//   type: '0x76ffc077ebde06ee2d20d819429f52a211934d97fc9fb0a98b07d241453ad139::launch_pool::LaunchPool<0x1::aptos_coin::AptosCoin>',
+//   data: {
+//     collateral_vault: { value: '99479532' },
+//     completed: false,
+//     constant_product: '139955682000000000000000000000',
+//     dynamic_threshold: 8000,
+//     initial_virtual_collateral_reserve: '130434000000',
+//     initial_virtual_token_reserve: '1073000000000000000',
+//     max_allocation_amount: '817400000000000000',
+//     max_threshold: 8157,
+//     migration_dex: { vec: '0x' },
+//     migration_fee: { vec: [] },
+//     min_allocation_amount: '799820983207404442',
+//     staking_pool_address: { vec: [] },
+//     staking_pool_enabled: { vec: [Array] },
+//     staking_pool_leaderboard_size: { vec: [Array] },
+//     token_allocation: '817733035608150',
+//     token_burn_ref: { vec: [Array] },
+//     token_vault: {
+//       inner: '0x11c1d689c6e48d60029aa31406d4825dea35cec4c8024ebe39fb112148ce8e55'
+//     },
+//     total_supply: '1000000000000000000',
+//     version: '2'
+//   }
+// }
+
+sdk.lunchpadModule
+  .getTokensToMigrate('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429', 0)
+  .then(console.log);
+
+
+// sdk.lunchpadModule
+//   .mintAndListIfReady('HRS', 'HAAOO', 'https://test.com', 'https://test.com', 1000000, true, 100)
+//   .then((transaction) => {
+//     sdk.poolModule
+//       .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
+//       .then(console.log);
+//   });
+
+//Generate Launch Pool ID is 0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429
+//Buy 1Move token to get token
+// sdk.lunchpadModule
+//   .buyToken('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429', 100000000, 1)
+//   .then((transaction) => {
+//     sdk.poolModule
+//       .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
+//       .then(console.log);
+//   });
+
+//Sell 10000e9 token to get Move token
+// sdk.lunchpadModule
+//   .sellToken(
+//     '0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429',
+//     '0x65b61c555427be4960314c8cb17360da1f48aab45da048b80348425b660582e3',
+//     10000e9,
+//     1
+//   )
+//   .then((transaction) => {
+//     sdk.poolModule
+//       .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
+//       .then(console.log);
+//   });
+
+//get from facuet
+sdk.poolModule.receiveFaucet(sdk.aptosClient, sdk.address).then(transaction => {
+  sdk.poolModule
+    .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
+    .then(console.log);
+});

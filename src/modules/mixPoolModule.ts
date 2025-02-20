@@ -1,17 +1,12 @@
 import { Aptos, InputGenerateTransactionPayloadData, MoveFunctionId } from '@aptos-labs/ts-sdk';
 
-import { INTERNAL_INDEXER_URL, PACKAGE_ID } from '../config';
+import { SDKConfig } from '../config';
 
 import { PoolModule } from './poolModule';
 
 export class MixPoolModule extends PoolModule {
-  protected client: Aptos;
-  protected senderAddress: string;
-
-  constructor(client: Aptos, senderAddress: string) {
-    super(client, senderAddress);
-    this.client = client;
-    this.senderAddress = senderAddress;
+  constructor(client: Aptos, senderAddress: string, sdkConfig: SDKConfig) {
+    super(client, senderAddress, sdkConfig);
   }
 
   async createPoolData(
@@ -29,7 +24,7 @@ export class MixPoolModule extends PoolModule {
 
     const data = {
       function:
-        `${PACKAGE_ID}::fungible_asset_coin_pair_service::initialize_liquidity` as MoveFunctionId,
+        `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::initialize_liquidity` as MoveFunctionId,
       functionArguments: [coinA, xAmount, yAmount, fee_numerator, fee_denominator],
       typeArguments: ['0x1::fungible_asset::Metadata', coinB],
     } as InputGenerateTransactionPayloadData;
@@ -67,14 +62,16 @@ export class MixPoolModule extends PoolModule {
     const coinB = poolInfo.y_TokenType;
     if (a2b) {
       const data = {
-        function: `${PACKAGE_ID}::fungible_asset_coin_pair_service::swap_x` as MoveFunctionId,
+        function:
+          `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::swap_x` as MoveFunctionId,
         functionArguments: [poolId, coinA, amount, minimumYAmount],
         typeArguments: ['0x1::fungible_asset::Metadata', coinB],
       } as InputGenerateTransactionPayloadData;
       return data;
     } else {
       const data = {
-        function: `${PACKAGE_ID}::fungible_asset_coin_pair_service::swap_y` as MoveFunctionId,
+        function:
+          `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::swap_y` as MoveFunctionId,
         functionArguments: [poolId, amount, minimumYAmount],
         typeArguments: [coinB],
       } as InputGenerateTransactionPayloadData;
@@ -119,7 +116,8 @@ export class MixPoolModule extends PoolModule {
     const coinB = tokenYType || poolInfo.y_TokenType;
 
     const data = {
-      function: `${PACKAGE_ID}::fungible_asset_coin_pair_service::add_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::add_liquidity` as MoveFunctionId,
       functionArguments: [poolId, coinA, xAmount, yAmount, []],
       typeArguments: ['0x1::fungible_asset::Metadata', coinB],
     } as InputGenerateTransactionPayloadData;
@@ -159,7 +157,7 @@ export class MixPoolModule extends PoolModule {
 
     const data = {
       function:
-        `${PACKAGE_ID}::fungible_asset_coin_pair_service::remove_liquidity` as MoveFunctionId,
+        `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::remove_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount, [], []],
       typeArguments: [coinB],
     } as InputGenerateTransactionPayloadData;
@@ -179,7 +177,8 @@ export class MixPoolModule extends PoolModule {
     const coinB = poolInfo.y_TokenType;
 
     const data = {
-      function: `${PACKAGE_ID}::fungible_asset_coin_pair_service::burn_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::burn_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount],
       typeArguments: [coinB],
     } as InputGenerateTransactionPayloadData;
@@ -202,14 +201,14 @@ export class MixPoolModule extends PoolModule {
     }
 
     const tokenBType = tokenYType || poolInfo.y_TokenType;
-    const poolType = `${PACKAGE_ID}::fungible_asset_coin_pair::FungibleAssetCoinPair<${tokenBType}>`;
+    const poolType = `${this.config.PACKAGE_ID}::fungible_asset_coin_pair::FungibleAssetCoinPair<${tokenBType}>`;
 
-    const fetchUrl = `${INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
+    const fetchUrl = `${this.config.INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
     const response = await fetch(fetchUrl);
     const data = await response.json();
     const faTokenBalance = data.data.x_reserve.inner;
 
-    const fetchUrl2 = `${INTERNAL_INDEXER_URL}/accounts/${faTokenBalance}/resource/0x1::fungible_asset::FungibleStore`;
+    const fetchUrl2 = `${this.config.INTERNAL_INDEXER_URL}/accounts/${faTokenBalance}/resource/0x1::fungible_asset::FungibleStore`;
     const response2 = await fetch(fetchUrl2);
     const data2 = await response2.json();
     const xBalance = data2.data.balance;

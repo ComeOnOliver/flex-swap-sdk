@@ -1,17 +1,12 @@
 import { Aptos, InputGenerateTransactionPayloadData, MoveFunctionId } from '@aptos-labs/ts-sdk';
 
-import { INTERNAL_INDEXER_URL, PACKAGE_ID } from '../config';
+import { SDKConfig } from '../config';
 
 import { PoolModule } from './poolModule';
 
 export class CoinModule extends PoolModule {
-  protected client: Aptos;
-  protected senderAddress: string;
-
-  constructor(client: Aptos, senderAddress: string) {
-    super(client, senderAddress);
-    this.client = client;
-    this.senderAddress = senderAddress;
+  constructor(client: Aptos, senderAddress: string, sdkConfig: SDKConfig) {
+    super(client, senderAddress, sdkConfig);
   }
 
   registerCoinData(coinType: string) {
@@ -49,7 +44,8 @@ export class CoinModule extends PoolModule {
     }
 
     const data = {
-      function: `${PACKAGE_ID}::coin_pair_service::initialize_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::coin_pair_service::initialize_liquidity` as MoveFunctionId,
       functionArguments: [xAmount, yAmount, fee_numerator, fee_denominator],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
@@ -87,14 +83,14 @@ export class CoinModule extends PoolModule {
 
     if (a2b) {
       const data = {
-        function: `${PACKAGE_ID}::coin_pair_service::swap_x` as MoveFunctionId,
+        function: `${this.config.PACKAGE_ID}::coin_pair_service::swap_x` as MoveFunctionId,
         functionArguments: [poolId, amount, minimumYAmount],
         typeArguments: [coinA, coinB],
       } as InputGenerateTransactionPayloadData;
       return data;
     } else {
       const data = {
-        function: `${PACKAGE_ID}::coin_pair_service::swap_y` as MoveFunctionId,
+        function: `${this.config.PACKAGE_ID}::coin_pair_service::swap_y` as MoveFunctionId,
         functionArguments: [poolId, amount, minimumYAmount],
         typeArguments: [coinA, coinB],
       } as InputGenerateTransactionPayloadData;
@@ -139,7 +135,7 @@ export class CoinModule extends PoolModule {
     const coinB = tokenYType || poolInfo.y_TokenType;
 
     const data = {
-      function: `${PACKAGE_ID}::coin_pair_service::add_liquidity` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::coin_pair_service::add_liquidity` as MoveFunctionId,
       functionArguments: [poolId, xAmount, yAmount, []],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
@@ -180,7 +176,7 @@ export class CoinModule extends PoolModule {
     const coinB = tokenYType || poolInfo.y_TokenType;
 
     const data = {
-      function: `${PACKAGE_ID}::coin_pair_service::remove_liquidity` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::coin_pair_service::remove_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount, [], []],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
@@ -201,7 +197,7 @@ export class CoinModule extends PoolModule {
     const coinB = poolInfo.y_TokenType;
 
     const data = {
-      function: `${PACKAGE_ID}::coin_pair_service::burn_liquidity` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::coin_pair_service::burn_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
@@ -233,8 +229,8 @@ export class CoinModule extends PoolModule {
 
     const tokenAType = tokenXType || poolInfo.x_TokenType;
     const tokenBType = tokenYType || poolInfo.y_TokenType;
-    const poolType = `${PACKAGE_ID}::coin_pair::CoinPair<${tokenAType},${tokenBType}>`;
-    const fetchUrl = `${INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
+    const poolType = `${this.config.PACKAGE_ID}::coin_pair::CoinPair<${tokenAType},${tokenBType}>`;
+    const fetchUrl = `${this.config.INTERNAL_INDEXER_URL}/accounts/${poolId}/resource/${poolType}`;
     const response = await fetch(fetchUrl);
     const data = await response.json();
     return data;

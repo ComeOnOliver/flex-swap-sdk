@@ -6,15 +6,17 @@ import {
   SimpleTransaction,
 } from '@aptos-labs/ts-sdk';
 
-import { INTERNAL_INDEXER, INTERNAL_RESERVE_INDEXER, PACKAGE_ID } from '../config';
+import { SDKConfig } from '../config';
 
 export class PoolModule {
   protected client: Aptos;
   protected senderAddress: string;
+  protected config: SDKConfig;
 
-  constructor(client: Aptos, senderAddress: string) {
+  constructor(client: Aptos, senderAddress: string, sdkConfig: SDKConfig) {
     this.client = client;
     this.senderAddress = senderAddress;
+    this.config = sdkConfig;
   }
 
   async signAndSubmitTransaction(client: Aptos, sender: Account, transaction: SimpleTransaction) {
@@ -70,7 +72,7 @@ export class PoolModule {
   }
   checkXLessThanYData(x: string, y: string) {
     const data = {
-      function: `${PACKAGE_ID}::token_util::is_type_less_than` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::token_util::is_type_less_than` as MoveFunctionId,
       functionArguments: [],
       typeArguments: [x, y],
     };
@@ -78,7 +80,7 @@ export class PoolModule {
   }
   checkAddressXLessThanYData(x: string, y: string) {
     const data = {
-      function: `${PACKAGE_ID}::token_util::is_address_less_than` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::token_util::is_address_less_than` as MoveFunctionId,
       functionArguments: [x, y],
     };
     return data;
@@ -91,7 +93,7 @@ export class PoolModule {
       : [reserveInfo.y_ReserveValue, reserveInfo.x_ReserveValue];
     const { feeNumerator, feeDenominator } = reserveInfo;
     return {
-      function: `${PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
       functionArguments: [reserveA, reserveB, amount, minimumYAmount, feeNumerator, feeDenominator],
     };
   }
@@ -144,7 +146,7 @@ export class PoolModule {
   }
 
   async getPoolInfo(poolId: string) {
-    const url = `${INTERNAL_INDEXER}/${poolId}`;
+    const url = `${this.config.INTERNAL_INDEXER}/${poolId}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -156,7 +158,7 @@ export class PoolModule {
   }
 
   async getReserveInfo(poolId: string) {
-    const url = `${INTERNAL_RESERVE_INDEXER}/${poolId}`;
+    const url = `${this.config.INTERNAL_RESERVE_INDEXER}/${poolId}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -196,7 +198,7 @@ export class PoolModule {
     const feeDenominator = reserveInfoData.fee_denominator;
 
     return {
-      function: `${PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
+      function: `${this.config.PACKAGE_ID}::swap_util::swap` as MoveFunctionId,
       functionArguments: [reserveA, reserveB, amount, minimumYAmount, feeNumerator, feeDenominator],
     };
   }
@@ -246,7 +248,8 @@ export class PoolModule {
   ) {
     const result = await client.view({
       payload: {
-        function: `${PACKAGE_ID}::liquidity_util::calculate_liquidity` as MoveFunctionId,
+        function:
+          `${this.config.PACKAGE_ID}::liquidity_util::calculate_liquidity` as MoveFunctionId,
         functionArguments: [totalSupplied, x_reserve, y_reserve, x_amount, y_amount],
       },
     });
@@ -306,5 +309,23 @@ export class PoolModule {
     // }
 
     return yAmountOut;
+  }
+
+  getFacuetDropData() {
+    const data = {
+      function:
+        `${this.config.PACKAGE_ID}::fungible_asset_coin_dual_faucet_service::drop` as MoveFunctionId,
+      functionArguments: ['0xf941eee75b40dbb850411009cab34cec0704fd7110f3f1974b7bf8d8fcbb7c84'],
+      typeArguments: [`${this.config.PACKAGE_ID}::fake_usd::FakeUSD`],
+    } as InputGenerateTransactionPayloadData;
+    return data;
+  }
+
+  async receiveFaucet(client: Aptos, user: string) {
+    const transaction = await client.transaction.build.simple({
+      sender: user,
+      data: this.getFacuetDropData(),
+    });
+    return transaction;
   }
 }
