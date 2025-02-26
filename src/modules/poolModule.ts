@@ -6,7 +6,7 @@ import {
   SimpleTransaction,
 } from '@aptos-labs/ts-sdk';
 
-import { SDKConfig } from '../config';
+import { CONFIG, SDKConfig } from "../config";
 
 export class PoolModule {
   protected client: Aptos;

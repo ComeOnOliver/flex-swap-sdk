@@ -218,17 +218,13 @@ const coinB = '0x2fbc6ff4a2ec557d85e3d1e6bf4fb68f81900baf54b395bc034bd680c0446fb
 //     console.log(`resr`, result);
 //   });
 
-sdk.lunchpadModule
-  .getCollateralPrice(
-    '0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429',
-    9,
-    799820983000000000
-  )
-  .then(console.log);
+// sdk.lunchpadModule
+//   .getCollateralPrice('0x1568082c2d372b4576957446c721ef7a07f6b0d83120e87aa26b152c72282854', 9)
+//   .then(console.log);
 
-sdk.lunchpadModule
-  .getLaunchPoolState('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429')
-  .then(console.log);
+// sdk.lunchpadModule
+//   .getLaunchPoolState('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429')
+//   .then(console.log);
 
 //Sample
 // Output:{
@@ -258,10 +254,9 @@ sdk.lunchpadModule
 //   }
 // }
 
-sdk.lunchpadModule
-  .getTokensToMigrate('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429', 0)
-  .then(console.log);
-
+// sdk.lunchpadModule
+//   .getTokensToMigrate('0x5104cb0447facf3c2ec5e5af30f83a8a8a4dc838614982ea8eb0a48809d64429', 0)
+//   .then(console.log);
 
 // sdk.lunchpadModule
 //   .mintAndListIfReady('HRS', 'HAAOO', 'https://test.com', 'https://test.com', 1000000, true, 100)
@@ -296,8 +291,28 @@ sdk.lunchpadModule
 //   });
 
 //get from facuet
-sdk.poolModule.receiveFaucet(sdk.aptosClient, sdk.address).then(transaction => {
-  sdk.poolModule
-    .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
-    .then(console.log);
-});
+// sdk.poolModule.receiveFaucet(sdk.aptosClient, sdk.address).then(transaction => {
+//   sdk.poolModule
+//     .signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction)
+//     .then(console.log);
+// });
+
+// sdk.poolModule
+//   .getFATokenInfo(
+//     sdk.aptosClient,
+//     '0x65b61c555427be4960314c8cb17360da1f48aab45da048b80348425b660582e3'
+//   )
+//   .then(console.log);
+
+// sdk.lunchpadModule.getAllLaunchPools().then(console.log);
+// sdk.lunchpadModule
+//   .getLunchPoolById('0x1568082c2d372b4576957446c721ef7a07f6b0d83120e87aa26b152c72282854')
+//   .then(console.log);
+// sdk.lunchpadModule.getLunchPoolCount().then(console.log);
+// sdk.lunchpadModule.getLunchPoolByPage(0, 5).then(console.log);
+
+// sdk.lunchpadModule.getAptosVersion(0, '0x56f72b5331c663928304aaa6e27d6042dac4f5bc090828d2c9ff3bb80f7b99cd').then(console.log);
+
+// sdk.lunchpadModule
+//   .getCollateralPrice('0xfd111d27c9aed24e43ac71bfeb5e34e3b7c743c9c4be2b2d42d35220bd426bf4', 9)
+//   .then(console.log);

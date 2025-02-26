@@ -1,8 +1,10 @@
-import { Aptos, InputGenerateTransactionPayloadData, MoveFunctionId } from '@aptos-labs/ts-sdk';
-
-import { SDKConfig } from '../config';
-
-import { PoolModule } from './poolModule';
+import {
+  Aptos,
+  InputGenerateTransactionPayloadData,
+  MoveFunctionId,
+} from "@aptos-labs/ts-sdk";
+import { SDKConfig } from "../config";
+import { PoolModule } from "./poolModule";
 
 export class MixPoolModule extends PoolModule {
   constructor(client: Aptos, senderAddress: string, sdkConfig: SDKConfig) {
@@ -17,7 +19,7 @@ export class MixPoolModule extends PoolModule {
     fee_numerator: number,
     fee_denominator: number
   ) {
-    if (coinA.includes('::')) {
+    if (coinA.includes("::")) {
       [coinA, coinB] = [coinB, coinA];
       [xAmount, yAmount] = [yAmount, xAmount];
     }
@@ -25,8 +27,14 @@ export class MixPoolModule extends PoolModule {
     const data = {
       function:
         `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::initialize_liquidity` as MoveFunctionId,
-      functionArguments: [coinA, xAmount, yAmount, fee_numerator, fee_denominator],
-      typeArguments: ['0x1::fungible_asset::Metadata', coinB],
+      functionArguments: [
+        coinA,
+        xAmount,
+        yAmount,
+        fee_numerator,
+        fee_denominator,
+      ],
+      typeArguments: ["0x1::fungible_asset::Metadata", coinB],
     } as InputGenerateTransactionPayloadData;
 
     return data;
@@ -56,7 +64,12 @@ export class MixPoolModule extends PoolModule {
     return transaction;
   }
 
-  async swapCoinData(poolId: string, a2b: boolean, amount: number, minimumYAmount: number) {
+  async swapCoinData(
+    poolId: string,
+    a2b: boolean,
+    amount: number,
+    minimumYAmount: number
+  ) {
     const poolInfo = await this.getPoolInfo(poolId);
     const coinA = poolInfo.x_TokenType;
     const coinB = poolInfo.y_TokenType;
@@ -65,7 +78,7 @@ export class MixPoolModule extends PoolModule {
         function:
           `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::swap_x` as MoveFunctionId,
         functionArguments: [poolId, coinA, amount, minimumYAmount],
-        typeArguments: ['0x1::fungible_asset::Metadata', coinB],
+        typeArguments: ["0x1::fungible_asset::Metadata", coinB],
       } as InputGenerateTransactionPayloadData;
       return data;
     } else {
@@ -119,7 +132,7 @@ export class MixPoolModule extends PoolModule {
       function:
         `${this.config.PACKAGE_ID}::fungible_asset_coin_pair_service::add_liquidity` as MoveFunctionId,
       functionArguments: [poolId, coinA, xAmount, yAmount, []],
-      typeArguments: ['0x1::fungible_asset::Metadata', coinB],
+      typeArguments: ["0x1::fungible_asset::Metadata", coinB],
     } as InputGenerateTransactionPayloadData;
     return data;
   }
@@ -164,7 +177,12 @@ export class MixPoolModule extends PoolModule {
     return data;
   }
 
-  async removeLiquidity(client: Aptos, user: string, poolId: string, liquidityAmount: number) {
+  async removeLiquidity(
+    client: Aptos,
+    user: string,
+    poolId: string,
+    liquidityAmount: number
+  ) {
     const transaction = await client.transaction.build.simple({
       sender: user,
       data: await this.removeLiquidityData({ poolId, liquidityAmount }),
@@ -185,7 +203,12 @@ export class MixPoolModule extends PoolModule {
     return data;
   }
 
-  async burnLiquidity(client: Aptos, user: string, poolId: string, liquidityAmount: number) {
+  async burnLiquidity(
+    client: Aptos,
+    user: string,
+    poolId: string,
+    liquidityAmount: number
+  ) {
     const transaction = await client.transaction.build.simple({
       sender: user,
       data: await this.burnLiquidityData(poolId, liquidityAmount),
@@ -193,7 +216,13 @@ export class MixPoolModule extends PoolModule {
     return transaction;
   }
 
-  async getPoolMetaData({ poolId, tokenYType }: { poolId: string; tokenYType?: string }) {
+  async getPoolMetaData({
+    poolId,
+    tokenYType,
+  }: {
+    poolId: string;
+    tokenYType?: string;
+  }) {
     let poolInfo;
 
     if (!tokenYType) {
@@ -216,9 +245,19 @@ export class MixPoolModule extends PoolModule {
     return data;
   }
 
-  async getSwapYPriceData(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+  async getSwapYPriceData(
+    poolId: string,
+    amount: number,
+    a2b: boolean,
+    minimumYAmount: number
+  ) {
     const reserveInfo = await this.getPoolMetaData({ poolId });
     const reserveInfoData = reserveInfo.data;
-    return this.calculateSwapYPriceData(reserveInfoData, amount, a2b, minimumYAmount);
+    return this.calculateSwapYPriceData(
+      reserveInfoData,
+      amount,
+      a2b,
+      minimumYAmount
+    );
   }
 }

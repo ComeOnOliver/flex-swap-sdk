@@ -1,8 +1,10 @@
-import { Aptos, InputGenerateTransactionPayloadData, MoveFunctionId } from '@aptos-labs/ts-sdk';
-
-import { SDKConfig } from '../config';
-
-import { PoolModule } from './poolModule';
+import {
+  Aptos,
+  InputGenerateTransactionPayloadData,
+  MoveFunctionId,
+} from "@aptos-labs/ts-sdk";
+import { SDKConfig } from "../config";
+import { PoolModule } from "./poolModule";
 
 export class CoinModule extends PoolModule {
   constructor(client: Aptos, senderAddress: string, sdkConfig: SDKConfig) {
@@ -76,21 +78,28 @@ export class CoinModule extends PoolModule {
     return transaction;
   }
 
-  async swapCoinData(poolId: string, a2b: boolean, amount: number, minimumYAmount: number) {
+  async swapCoinData(
+    poolId: string,
+    a2b: boolean,
+    amount: number,
+    minimumYAmount: number
+  ) {
     const poolInfo = await this.getPoolInfo(poolId);
     const coinA = poolInfo.x_TokenType;
     const coinB = poolInfo.y_TokenType;
 
     if (a2b) {
       const data = {
-        function: `${this.config.PACKAGE_ID}::coin_pair_service::swap_x` as MoveFunctionId,
+        function:
+          `${this.config.PACKAGE_ID}::coin_pair_service::swap_x` as MoveFunctionId,
         functionArguments: [poolId, amount, minimumYAmount],
         typeArguments: [coinA, coinB],
       } as InputGenerateTransactionPayloadData;
       return data;
     } else {
       const data = {
-        function: `${this.config.PACKAGE_ID}::coin_pair_service::swap_y` as MoveFunctionId,
+        function:
+          `${this.config.PACKAGE_ID}::coin_pair_service::swap_y` as MoveFunctionId,
         functionArguments: [poolId, amount, minimumYAmount],
         typeArguments: [coinA, coinB],
       } as InputGenerateTransactionPayloadData;
@@ -135,7 +144,8 @@ export class CoinModule extends PoolModule {
     const coinB = tokenYType || poolInfo.y_TokenType;
 
     const data = {
-      function: `${this.config.PACKAGE_ID}::coin_pair_service::add_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::coin_pair_service::add_liquidity` as MoveFunctionId,
       functionArguments: [poolId, xAmount, yAmount, []],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
@@ -176,14 +186,20 @@ export class CoinModule extends PoolModule {
     const coinB = tokenYType || poolInfo.y_TokenType;
 
     const data = {
-      function: `${this.config.PACKAGE_ID}::coin_pair_service::remove_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::coin_pair_service::remove_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount, [], []],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
     return data;
   }
 
-  async removeLiquidity(client: Aptos, user: string, poolId: string, liquidityAmount: number) {
+  async removeLiquidity(
+    client: Aptos,
+    user: string,
+    poolId: string,
+    liquidityAmount: number
+  ) {
     const transaction = await client.transaction.build.simple({
       sender: user,
       data: await this.removeLiquidityData({ poolId, liquidityAmount }),
@@ -197,14 +213,20 @@ export class CoinModule extends PoolModule {
     const coinB = poolInfo.y_TokenType;
 
     const data = {
-      function: `${this.config.PACKAGE_ID}::coin_pair_service::burn_liquidity` as MoveFunctionId,
+      function:
+        `${this.config.PACKAGE_ID}::coin_pair_service::burn_liquidity` as MoveFunctionId,
       functionArguments: [poolId, liquidityAmount],
       typeArguments: [coinA, coinB],
     } as InputGenerateTransactionPayloadData;
     return data;
   }
 
-  async burnLiquidity(client: Aptos, user: string, poolId: string, liquidityAmount: number) {
+  async burnLiquidity(
+    client: Aptos,
+    user: string,
+    poolId: string,
+    liquidityAmount: number
+  ) {
     const transaction = await client.transaction.build.simple({
       sender: user,
       data: await this.burnLiquidityData(poolId, liquidityAmount),
@@ -236,10 +258,20 @@ export class CoinModule extends PoolModule {
     return data;
   }
 
-  async getSwapYPriceData(poolId: string, amount: number, a2b: boolean, minimumYAmount: number) {
+  async getSwapYPriceData(
+    poolId: string,
+    amount: number,
+    a2b: boolean,
+    minimumYAmount: number
+  ) {
     const reserveInfo = await this.getPoolMetaData({ poolId });
     const reserveInfoData = reserveInfo.data;
 
-    return this.calculateSwapYPriceData(reserveInfoData, amount, a2b, minimumYAmount);
+    return this.calculateSwapYPriceData(
+      reserveInfoData,
+      amount,
+      a2b,
+      minimumYAmount
+    );
   }
 }
