@@ -12,9 +12,9 @@ export interface SDKConfig {
 }
 
 const BARDOCK_TESTNET_CONFIG: SDKConfig = {
-  FULLNODE: "https://aptos.testnet.bardock.movementlabs.xyz/v1",
+  FULLNODE: "https://testnet.bardock.movementnetwork.xyz/v1",
   FAUCET: "https://faucet.testnet.bardock.movementnetwork.xyz/",
-  INDEXER: "https://indexer.testnet.movementnetwork.xyz/v1/graphql",
+  INDEXER: "https://indexer.testnet.movementnetwork.xyz",
   PACKAGE_ID:
     "0x76ffc077ebde06ee2d20d819429f52a211934d97fc9fb0a98b07d241453ad139",
   INTERNAL_INDEXER_URL: "https://aptos.testnet.bardock.movementlabs.xyz/v1",
