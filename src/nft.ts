@@ -7,8 +7,8 @@ dotenv.config();
 // Specify which network to connect to via AptosConfig
 
 const privateKey = process.env.NFT_PRIVATE_KEY || '';
-
-const sdk = new FlexSDK(CONFIG['Bardock Testnet'], privateKey);
+const network = CONFIG['Bardock Testnet'];
+const sdk = new FlexSDK(network, privateKey);
 console.log(`use this address: ${sdk.address}`);
 
 // mint nft
@@ -157,3 +157,20 @@ fetchOwnedTokens(sdk.address)
         console.error('Failed to fetch owned tokens:', error);
     });
 
+
+// 3. check total minted
+const collectionid = '0xedaffaf9f8d3ab1ae121afa405736ff1257d4115f19b25a3818e762065b18f3d';
+function checkTotalMinted() {
+    const fetchUrl = `${network.FULLNODE}/accounts/${collectionid}/resource/0x4::collection::ConcurrentSupply`;
+    return fetch(fetchUrl)
+        .then(response => response.json())
+        .then(responseData => {
+            console.log(responseData);
+            return responseData;
+        })
+        .catch(error => {
+            console.error('Error checking total minted:', error);
+        });
+}
+
+checkTotalMinted();
