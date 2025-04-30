@@ -23,17 +23,17 @@ const data = {
 } as InputGenerateTransactionPayloadData;
 
 // Chain promises instead of using top-level await
-sdk.aptosClient.transaction.build.simple({
-    sender: sdk.address,
-    data: data,
-})
-    .then(transaction => {
-        return sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction);
-    })
-    .then(console.log)
-    .catch(error => {
-        console.error("Error:", error);
-    });
+// sdk.aptosClient.transaction.build.simple({
+//     sender: sdk.address,
+//     data: data,
+// })
+//     .then(transaction => {
+//         return sdk.poolModule.signAndSubmitTransaction(sdk.aptosClient, sdk.account, transaction);
+//     })
+//     .then(console.log)
+//     .catch(error => {
+//         console.error("Error:", error);
+//     });
 
 
 
@@ -145,32 +145,33 @@ interface TokenOwnership {
 }
 
 // Example usage (as a promise chain to avoid top-level await)
-fetchOwnedTokens(sdk.address)
-    .then(data => {
-        const tokenOwnerships = data?.data?.current_token_ownerships_v2 || [];
-        const mysteriousBoxTokens = tokenOwnerships
-            .filter((token: TokenOwnership) => token.current_token_data?.token_name?.includes('MysteriousBox'))
-            .map((token: TokenOwnership) => token.token_data_id);
-        console.log('Mysterious Box Token IDs:', mysteriousBoxTokens);
-    })
-    .catch(error => {
-        console.error('Failed to fetch owned tokens:', error);
-    });
+// fetchOwnedTokens(sdk.address)
+//     .then(data => {
+//         const tokenOwnerships = data?.data?.current_token_ownerships_v2 || [];
+//         const mysteriousBoxTokens = tokenOwnerships
+//             .filter((token: TokenOwnership) => token.current_token_data?.token_name?.includes('MysteriousBox'))
+//             .map((token: TokenOwnership) => token.token_data_id);
+//         console.log('Mysterious Box Token IDs:', mysteriousBoxTokens);
+//     })
+//     .catch(error => {
+//         console.error('Failed to fetch owned tokens:', error);
+//     });
 
 
 // 3. check total minted
 const collectionid = '0xedaffaf9f8d3ab1ae121afa405736ff1257d4115f19b25a3818e762065b18f3d';
-function checkTotalMinted() {
-    const fetchUrl = `${network.FULLNODE}/accounts/${collectionid}/resource/0x4::collection::ConcurrentSupply`;
-    return fetch(fetchUrl)
-        .then(response => response.json())
-        .then(responseData => {
-            console.log(responseData);
-            return responseData;
-        })
-        .catch(error => {
-            console.error('Error checking total minted:', error);
-        });
+
+async function checkTotalMinted() {
+    const fetchUrl = `${network.FULLNODE}/accounts/${collectionid}/resource/0x1::object::ObjectCore`;
+    const response = await fetch(fetchUrl);
+    const data = await response.json();
+    const creator = data.data.owner;
+    console.log(creator);
+
+    const fetchUrl1 = `${network.FULLNODE}/accounts/${creator}/resource/${contractAddress}::token_collection::TokenCollection`;
+    const response1 = await fetch(fetchUrl1);
+    const data1 = await response1.json();
+    console.log(data1.data.sold_count);
 }
 
 checkTotalMinted();
